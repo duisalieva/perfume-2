@@ -1,0 +1,315 @@
+{
+  "info": {
+    "_postman_id": "a9328fc1-48e2-4656-82da-bf1882d03de8",
+    "name": "My Perfume Collection API",
+    "description": "Flask + PostgreSQL + Docker Compose CRUD API. Requests are ordered for safe demonstration: create a temporary test record, update it, filter it, delete it, and verify 404. No credentials are stored in this collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "59272247",
+    "_collection_link": "https://go.postman.co/collection/59272247-a9328fc1-48e2-4656-82da-bf1882d03de8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 - Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "health"
+          ]
+        },
+        "description": "Check that the Flask backend is running."
+      },
+      "response": []
+    },
+    {
+      "name": "02 - List All Perfumes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes"
+          ]
+        },
+        "description": "Returns all perfumes sorted by ID."
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Create Test Perfume",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"Test Brand\",\n  \"name\": \"API Test Perfume safe to delete\",\n  \"concentration\": \"EDP\",\n  \"top_notes\": \"Bergamot\",\n  \"volume_ml\": 100,\n  \"remaining_ml\": 25,\n  \"heart_notes\": \"Rose\",\n  \"base_notes\": \"Musk\",\n  \"fragrance_family\": \"Floral\",\n  \"status\": \"owned\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes"
+          ]
+        },
+        "description": "Creates a temporary sample perfume. The post-response script saves its new ID as collection variable perfumeId. Re-run this request before repeating the Update/Delete sequence."
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Get Perfume by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes/{{perfumeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes",
+            "{{perfumeId}}"
+          ]
+        },
+        "description": "Returns the sample perfume identified by perfumeId (set automatically by Create Test Perfume)."
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Update Test Perfume",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"Test Brand\",\n  \"name\": \"API Test Perfume - safe to delete\",\n  \"concentration\": \"EDP\",\n  \"volume_ml\": 30,\n  \"remaining_ml\": 20,\n  \"top_notes\": \"Bergamot\",\n  \"heart_notes\": \"Rose\",\n  \"base_notes\": \"Musk\",\n  \"fragrance_family\": \"Floral\",\n  \"status\": \"owned\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes/{{perfumeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes",
+            "{{perfumeId}}"
+          ]
+        },
+        "description": "Full replacement using PUT: changes remaining_ml to 7. All fields are sent to avoid clearing omitted optional properties."
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Filter by Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes?status=owned",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "owned"
+            }
+          ]
+        },
+        "description": "Only returns perfumes with status owned. You can change owned to wishlist or want_to_test."
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Filter Low Stock",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes?low_stock=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes"
+          ],
+          "query": [
+            {
+              "key": "low_stock",
+              "value": "true"
+            }
+          ]
+        },
+        "description": "Returns owned perfumes with a known remaining volume of 10 ml or less. After Update, the test perfume should appear here."
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Delete Test Perfume",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes/{{perfumeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes",
+            "{{perfumeId}}"
+          ]
+        },
+        "description": "Deletes the TEMPORARY sample perfume using the ID saved by Create. Never manually set perfumeId to an ID you want to keep."
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Verify Deleted Perfume 404",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfumes/{{perfumeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "perfumes",
+            "{{perfumeId}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5051",
+      "description": "Base URL for the Flask backend"
+    },
+    {
+      "key": "perfumeId",
+      "value": "",
+      "description": "Automatically set by Create Test Perfume. Do not set to a real perfume for the Delete demonstration."
+    }
+  ]
+}
