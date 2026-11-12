@@ -1,0 +1,838 @@
+{
+  "info": {
+    "name": "Perfume Price Tracker — HW4 API",
+    "_postman_id": "9b77b92e-869b-493f-8c7e-2c71f88310cc",
+    "description": "Full 19-endpoint Flask/PostgreSQL API demo. Run folders 01–08 in order. Creates and cleans up isolated test records; do not use real record IDs for DELETE.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Health",
+      "description": "",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "description": "Simple health response. Does not check database directly."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Create Test Data",
+      "description": "Run top to bottom first. These requests are non-destructive to existing real perfumes.",
+      "item": [
+        {
+          "name": "POST Test Perfume (save ID)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/perfumes",
+            "description": "Creates only a temporary test perfume; saves its generated ID in testPerfumeId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand\": \"Test Brand\",\n  \"name\": \"HW4 Demo Perfume\",\n  \"concentration\": \"EDP\",\n  \"volume_ml\": 100,\n  \"remaining_ml\": 95,\n  \"top_notes\": \"Bergamot\",\n  \"heart_notes\": \"Rose\",\n  \"base_notes\": \"Musk\",\n  \"fragrance_family\": \"Floral\",\n  \"status\": \"owned\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { const data = pm.response.json(); pm.collectionVariables.set(\"testPerfumeId\", String(data.id)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Test Retailer (save ID)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/retailers",
+            "description": "Creates a temporary test retailer with a timestamp in the name; saves generated ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"HW4 Demo Store {{$timestamp}}\",\n  \"website_url\": \"https://example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { const data = pm.response.json(); pm.collectionVariables.set(\"testRetailerId\", String(data.id)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Test Offer (save ID)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/price-offers",
+            "description": "Requires both testPerfumeId and testRetailerId populated by previous POST requests. Price is illustrative.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"perfume_id\": {{testPerfumeId}},\n  \"retailer_id\": {{testRetailerId}},\n  \"volume_ml\": 100,\n  \"price_kzt\": 150000,\n  \"product_url\": \"https://example.com/hw4-test-offer\",\n  \"is_available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { const data = pm.response.json(); pm.collectionVariables.set(\"testOfferId\", String(data.id)); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Perfumes",
+      "description": "",
+      "item": [
+        {
+          "name": "GET All Perfumes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Test Perfume by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Test Perfume",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}",
+            "description": "Full replacement update; no real perfume affected.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand\": \"Test Brand\",\n  \"name\": \"HW4 Demo Perfume Updated\",\n  \"concentration\": \"EDP\",\n  \"volume_ml\": 100,\n  \"remaining_ml\": 25,\n  \"top_notes\": \"Bergamot\",\n  \"heart_notes\": \"Rose\",\n  \"base_notes\": \"Musk\",\n  \"fragrance_family\": \"Floral\",\n  \"status\": \"owned\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Perfumes: Owned",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes?status=owned"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Perfumes: Low Stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes?low_stock=true"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Retailers",
+      "description": "",
+      "item": [
+        {
+          "name": "GET All Retailers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/retailers"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Test Retailer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/retailers/{{testRetailerId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Test Retailer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/retailers/{{testRetailerId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"HW4 Demo Store Updated {{$timestamp}}\",\n  \"website_url\": \"https://example.org\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Price Offers",
+      "description": "",
+      "item": [
+        {
+          "name": "GET All Price Offers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/price-offers"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Test Offer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/price-offers/{{testOfferId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT Test Offer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/price-offers/{{testOfferId}}",
+            "description": "Update the temporary offer; checked_at refreshes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"perfume_id\": {{testPerfumeId}},\n  \"retailer_id\": {{testRetailerId}},\n  \"volume_ml\": 100,\n  \"price_kzt\": 149000,\n  \"product_url\": \"https://example.org/hw4-test-offer\",\n  \"is_available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 Related Endpoints",
+      "description": "",
+      "item": [
+        {
+          "name": "GET Offers for Test Perfume",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}/offers"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Returns offers array\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Offers for Test Retailer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/retailers/{{testRetailerId}}/offers"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Returns offers array\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Cheapest for 100 ml",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}/cheapest?volume_ml=100"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Correct volume and available offer\", function () { const d=pm.response.json(); pm.expect(d.requested_volume_ml).to.eql(100); pm.expect(d.cheapest_offer.is_available).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Cheapest (default perfume volume)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}/cheapest"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 Negative Tests",
+      "description": "Negative tests should not insert/delete valid database records.",
+      "item": [
+        {
+          "name": "GET Missing Retailer → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/retailers/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Missing Offer → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/price-offers/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Missing Perfume Offers → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/999999999/offers"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Cheapest Invalid Volume → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}/cheapest?volume_ml=-5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Perfumes Invalid Status → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes?status=unknown"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Retailer Missing Name → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/retailers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"website_url\": \"https://example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Invalid Price → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/price-offers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"perfume_id\": {{testPerfumeId}},\n  \"retailer_id\": {{testRetailerId}},\n  \"volume_ml\": 100,\n  \"price_kzt\": -100,\n  \"product_url\": \"https://example.com/hw4-test-offer\",\n  \"is_available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Nonexistent Retailer → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/price-offers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"perfume_id\": {{testPerfumeId}},\n  \"retailer_id\": 999999999,\n  \"volume_ml\": 100,\n  \"price_kzt\": 150000,\n  \"product_url\": \"https://example.com/hw4-test-offer\",\n  \"is_available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Duplicate Offer → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/price-offers",
+            "description": "Same perfume + retailer + volume. Must run after the test offer has been created.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"perfume_id\": {{testPerfumeId}},\n  \"retailer_id\": {{testRetailerId}},\n  \"volume_ml\": 100,\n  \"price_kzt\": 150000,\n  \"product_url\": \"https://example.com/hw4-test-offer\",\n  \"is_available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 Cleanup — Test Records Only",
+      "description": "Run after all demo and error tests, in this exact order.",
+      "item": [
+        {
+          "name": "DELETE Test Offer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/price-offers/{{testOfferId}}",
+            "description": "Delete only the ID created by POST Test Offer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.unset(\"testOfferId\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Test Retailer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/retailers/{{testRetailerId}}",
+            "description": "Delete only the test retailer, after deleting its offer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.unset(\"testRetailerId\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Test Perfume",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/perfumes/{{testPerfumeId}}",
+            "description": "Delete only the test perfume, after deleting its offer."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { pm.collectionVariables.unset(\"testPerfumeId\"); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5051",
+      "type": "string"
+    },
+    {
+      "key": "testPerfumeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testRetailerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testOfferId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

@@ -46,5 +46,57 @@ def init_db():
                         )
                     );
                 """)
+                            # Create retailers table
+                        # Create retailers table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS retailers (
+                        id SERIAL PRIMARY KEY,
+
+                        name VARCHAR(150) NOT NULL UNIQUE,
+
+                        website_url TEXT NOT NULL,
+
+                        created_at TIMESTAMPTZ
+                            NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+                            # Create price offers table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS price_offers (
+                        id SERIAL PRIMARY KEY,
+
+                        perfume_id INTEGER NOT NULL
+                            REFERENCES postgres_sabog_table(id)
+                            ON DELETE CASCADE,
+
+                        retailer_id INTEGER NOT NULL
+                            REFERENCES retailers(id)
+                            ON DELETE RESTRICT,
+
+                        volume_ml INTEGER NOT NULL
+                            CHECK (volume_ml > 0),
+
+                        price_kzt NUMERIC(12, 2) NOT NULL
+                            CHECK (price_kzt > 0),
+
+                        product_url TEXT NOT NULL,
+
+                        is_available BOOLEAN NOT NULL DEFAULT TRUE,
+
+                        checked_at TIMESTAMPTZ
+                            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                        CONSTRAINT unique_price_offer
+                            UNIQUE (perfume_id, retailer_id, volume_ml)
+                    );
+                """)
+                              
+                cursor.execute("""
+                    INSERT INTO retailers (name, website_url)
+                    VALUES
+                        ('Golden Apple', 'https://goldapple.kz'),
+                        ('Parfbar', 'https://parfbar.kz')
+                    ON CONFLICT (name) DO NOTHING;
+                """)
     finally:
         connection.close()

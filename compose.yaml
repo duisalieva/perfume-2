@@ -5,23 +5,23 @@ services:
     ports:
       - "5051:5051" #все еще связываем как бы порты компьютера и порт докера
     environment:
-      DB_HOST: sabog_docker_db #хочу тут написать sabog_db можно?
+      DB_HOST: sabog_docker_db 
       DB_NAME: ${POSTGRES_DB} # передается имя базы данных из файла окружения
       DB_USER: ${POSTGRES_USER} # передается имя пользователя из файла окружения
       DB_PASSWORD: ${POSTGRES_PASSWORD} # передается пароль из файла окружения
     depends_on:
       sabog_docker_db:
-        condition: service_healthy #не знаю откуда
+        condition: service_healthy 
 
-  sabog_docker_db: #тут тогда тоже sabog_db?
-    image: postgres:17 #17 это версия постгрес?
+  sabog_docker_db: 
+    image: postgres:17
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - perfume_data:/var/lib/postgresql/data #наше хранилище базы данных, в докере не в постгрес
-    healthcheck: #проверка что все работает, с интервалом 5 секунд мы отправляем данные для входа и просим войти? 10 раз попыток? пока не войдется?
+    healthcheck: 
       test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""] 
       interval: 5s
       timeout: 5s
